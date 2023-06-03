@@ -1,0 +1,13 @@
+package main
+
+type configs struct {
+	botToken        string
+	channelChatId   int64
+	channelUsername string
+}
+
+var Configs *configs = &configs{
+	botToken:        "",
+	channelChatId:   ,
+	channelUsername: "",
+}
