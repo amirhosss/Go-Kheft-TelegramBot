@@ -11,6 +11,10 @@ type Languages struct {
 		Default struct {
 			Query    []string `json:"query"`
 			Response []string `json:"response"`
+			Btns     []struct {
+				Text     string `json:"text"`
+				Callback string `json:"callback"`
+			}
 		}
 	}
 }
