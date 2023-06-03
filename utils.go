@@ -15,7 +15,7 @@ func checkMemberShip(b *gotgbot.Bot) filters.Message {
 		chatMember, err := b.GetChatMember(Configs.channelChatId, m.Chat.Id, nil)
 		status := chatMember.GetStatus()
 		if err != nil {
-			log.Printf("Get status failed: %s", err)
+			log.Printf("Cannot get status: %s", err)
 		} else if status == "creator" || status == "member" {
 			return true
 		} else {
@@ -42,7 +42,7 @@ func checkMemberShip(b *gotgbot.Bot) filters.Message {
 			if err != nil {
 				log.Printf("Failed to send reply: %s", err)
 			}
-			return false
 		}
+		return false
 	}
 }
