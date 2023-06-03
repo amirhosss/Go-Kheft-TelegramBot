@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"kheft/bot/languages"
+	"log"
 	"strings"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
@@ -14,19 +15,33 @@ func checkMemberShip(b *gotgbot.Bot) filters.Message {
 		chatMember, err := b.GetChatMember(Configs.channelChatId, m.Chat.Id, nil)
 		status := chatMember.GetStatus()
 		if err != nil {
-			panic(err)
+			log.Printf("Get status failed: %s", err)
 		} else if status == "creator" || status == "member" {
 			return true
 		} else {
 			response := fmt.Sprintf(strings.Join(languages.Response.Messages.Default.Response, "\n"),
 				m.Chat.FirstName, m.Chat.Id, Configs.channelUsername)
+
+			var keyboards [][]gotgbot.InlineKeyboardButton
+			btns := languages.Response.Messages.Default.Btns
+			keyboard := make([]gotgbot.InlineKeyboardButton, len(btns))
+
+			for i, data := range btns {
+				keyboard[i].Text = data.Text
+				keyboard[i].CallbackData = data.Callback
+			}
+			keyboards = append(keyboards, keyboard[:])
+			markup := gotgbot.InlineKeyboardMarkup{
+				InlineKeyboard: keyboards,
+			}
+
 			_, err := m.Reply(b, response, &gotgbot.SendMessageOpts{
-				ParseMode: "MarkdownV2",
+				ParseMode:   "MarkdownV2",
+				ReplyMarkup: markup,
 			})
 			if err != nil {
-				panic(err)
+				log.Printf("Failed to send reply: %s", err)
 			}
-			// fmt.Println(response)
 			return false
 		}
 	}
