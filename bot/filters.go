@@ -1,4 +1,4 @@
-package main
+package bot
 
 import (
 	"log"
@@ -9,7 +9,7 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters"
 )
 
-func checkMembership(b *gotgbot.Bot, state bool) filters.Message {
+func CheckMembership(b *gotgbot.Bot, state bool) filters.Message {
 	// state parameter reverse the return value
 
 	return func(m *gotgbot.Message) bool {
@@ -18,11 +18,11 @@ func checkMembership(b *gotgbot.Bot, state bool) filters.Message {
 			log.Printf("cannot get status: %s", err)
 		}
 		status := chatMember.GetStatus()
-		if (status == "creator" || status == "member") && state == true {
+		if (status == "creator" || status == "member") && state {
 			return true
-		} else if (status == "creator" || status == "member") && state == false {
+		} else if (status == "creator" || status == "member") && !state {
 			return false
-		} else if state == false {
+		} else if !state {
 			return true
 		}
 
