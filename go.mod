@@ -1,4 +1,4 @@
-module kheft/bot
+module kheft
 
 go 1.20
 
