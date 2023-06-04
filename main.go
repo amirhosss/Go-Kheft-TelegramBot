@@ -5,12 +5,15 @@ import (
 	"net/http"
 	"time"
 
+	"kheft/bot"
 	conf "kheft/bot/configs"
 	myhandlers "kheft/bot/handlers"
+	"kheft/bot/languages"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
+	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters/message"
 )
 
 // This bot is as basic as it gets - it simply repeats everything you say.
@@ -42,7 +45,13 @@ func main() {
 
 	// Add echo handler to reply to all text messages.
 	// dispatcher.AddHandler(handlers.NewMessage(message.Channel, echo))
-	dispatcher.AddHandler(handlers.NewMessage(checkMembership(b, false), myhandlers.NonMemberStart))
+	dispatcher.AddHandler(handlers.NewMessage(bot.CheckMembership(b, false),
+		myhandlers.NonMemberStart))
+	dispatcher.AddHandler(handlers.NewMessage(bot.CheckMembership(b, true),
+		myhandlers.MemberStart))
+	dispatcher.AddHandler(
+		handlers.NewMessage(message.Equal(languages.Response.Messages.NonMember.Btns[0]),
+			myhandlers.NonMemberChecking))
 
 	// Start receiving updates.
 	err = updater.StartPolling(b, &ext.PollingOpts{
