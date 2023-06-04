@@ -1,10 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"time"
+
+	conf "kheft/bot/configs"
+	myhandlers "kheft/bot/handlers"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
@@ -14,7 +16,7 @@ import (
 // This bot is as basic as it gets - it simply repeats everything you say.
 func main() {
 	// Create bot from environment value.
-	b, err := gotgbot.NewBot(Configs.botToken, &gotgbot.BotOpts{
+	b, err := gotgbot.NewBot(conf.Configs.BotToken, &gotgbot.BotOpts{
 		Client: http.Client{},
 		DefaultRequestOpts: &gotgbot.RequestOpts{
 			Timeout: gotgbot.DefaultTimeout,
@@ -40,7 +42,7 @@ func main() {
 
 	// Add echo handler to reply to all text messages.
 	// dispatcher.AddHandler(handlers.NewMessage(message.Channel, echo))
-	dispatcher.AddHandler(handlers.NewMessage(checkMemberShip(b), echo))
+	dispatcher.AddHandler(handlers.NewMessage(checkMembership(b, false), myhandlers.NonMemberStart))
 
 	// Start receiving updates.
 	err = updater.StartPolling(b, &ext.PollingOpts{
@@ -59,13 +61,4 @@ func main() {
 
 	// Idle, to keep updates coming in, and avoid bot stopping.
 	updater.Idle()
-}
-
-// echo replies to a messages with its own contents.
-func echo(b *gotgbot.Bot, ctx *ext.Context) error {
-	_, err := ctx.EffectiveMessage.Reply(b, ctx.EffectiveMessage.Text, nil)
-	if err != nil {
-		return fmt.Errorf("failed to echo message: %w", err)
-	}
-	return nil
 }
