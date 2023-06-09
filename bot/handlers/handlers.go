@@ -5,17 +5,17 @@ import (
 	"strings"
 
 	"kheft/bot"
-	conf "kheft/bot/configs"
 	"kheft/bot/languages"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
+	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
 )
 
 // echo replies to a messages with its own contents.
 func NonMemberStart(b *gotgbot.Bot, ctx *ext.Context) error {
 	response := fmt.Sprintf(strings.Join(languages.Response.Messages.NonMember.Response, "\n"),
-		ctx.Message.Chat.FirstName, ctx.Message.Chat.Id, conf.Configs.ChannelUsername)
+		ctx.Message.Chat.FirstName, ctx.Message.Chat.Id, bot.Configs.ChannelUsername)
 
 	var keyboards [][]gotgbot.KeyboardButton
 	btns := languages.Response.Messages.NonMember.Btns
@@ -68,7 +68,7 @@ func MemberStart(b *gotgbot.Bot, ctx *ext.Context) error {
 }
 
 func NonMemberChecking(b *gotgbot.Bot, ctx *ext.Context) error {
-	status := bot.CheckMembership(b, true)(ctx.EffectiveMessage)
+	status := (&bot.CheckMembershipOpts{}).CheckMessage(b)(ctx.EffectiveMessage)
 	if status {
 		err := MemberStart(b, ctx)
 		if err != nil {
@@ -81,4 +81,12 @@ func NonMemberChecking(b *gotgbot.Bot, ctx *ext.Context) error {
 		}
 	}
 	return nil
+}
+
+func Registration(b *gotgbot.Bot, ctx *ext.Context) error {
+	_, err := ctx.EffectiveMessage.Reply(b, "you are in registration", nil)
+	if err != nil {
+		return fmt.Errorf("registration failed: %s", err)
+	}
+	return handlers.NextConversationState("cancel")
 }
