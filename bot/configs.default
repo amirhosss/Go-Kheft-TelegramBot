@@ -1,4 +1,4 @@
-package configs
+package bot
 
 type configs struct {
 	BotToken        string
