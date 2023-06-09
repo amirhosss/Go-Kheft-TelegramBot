@@ -9,16 +9,21 @@ import (
 type Languages struct {
 	Messages struct {
 		NonMember struct {
-			Query    []string `json:"query"`
+			Query    string   `json:"query"`
 			Response []string `json:"response"`
 			Btns     []string `json:"btns"`
 			Failed   string   `json:"failed"`
 		}
 		Member struct {
-			Query    []string `json:"query"`
+			Query    string   `json:"query"`
 			Response []string `json:"response"`
 			Btns     []string `json:"btns"`
 			Failed   string   `json:"failed"`
+		}
+		Registration struct {
+			Query    string   `json:"query"`
+			Response []string `json:"response"`
+			Btns     []string `json:"btns"`
 		}
 	}
 }
