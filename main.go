@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"kheft/bot"
-	conf "kheft/bot/configs"
 	myhandlers "kheft/bot/handlers"
 	"kheft/bot/languages"
 
@@ -19,7 +18,7 @@ import (
 // This bot is as basic as it gets - it simply repeats everything you say.
 func main() {
 	// Create bot from environment value.
-	b, err := gotgbot.NewBot(conf.Configs.BotToken, &gotgbot.BotOpts{
+	b, err := gotgbot.NewBot(bot.Configs.BotToken, &gotgbot.BotOpts{
 		Client: http.Client{},
 		DefaultRequestOpts: &gotgbot.RequestOpts{
 			Timeout: gotgbot.DefaultTimeout,
@@ -43,15 +42,38 @@ func main() {
 	})
 	dispatcher := updater.Dispatcher
 
-	// Add echo handler to reply to all text messages.
-	// dispatcher.AddHandler(handlers.NewMessage(message.Channel, echo))
-	dispatcher.AddHandler(handlers.NewMessage(bot.CheckMembership(b, false),
-		myhandlers.NonMemberStart))
-	dispatcher.AddHandler(handlers.NewMessage(bot.CheckMembership(b, true),
-		myhandlers.MemberStart))
-	dispatcher.AddHandler(
-		handlers.NewMessage(message.Equal(languages.Response.Messages.NonMember.Btns[0]),
-			myhandlers.NonMemberChecking))
+	registrationHandler := handlers.NewMessage(
+		(&bot.CheckMembershipOpts{
+			MessageText: languages.Response.Messages.Member.Btns[0],
+		}).CheckMessage(b),
+		myhandlers.Registration,
+	)
+	nonMemberStartHandler := handlers.NewMessage(
+		(&bot.CheckMembershipOpts{
+			ReverseState: true,
+		}).CheckMessage(b),
+		myhandlers.NonMemberStart,
+	)
+	memberStartHandler := handlers.NewMessage(
+		(&bot.CheckMembershipOpts{}).CheckMessage(b),
+		myhandlers.MemberStart)
+	nonMemberCheckingHandler := handlers.NewMessage(message.Equal(languages.Response.Messages.NonMember.Btns[0]),
+		myhandlers.NonMemberChecking)
+
+	conversation := []ext.Handler{registrationHandler}
+	conversationHandler := handlers.NewConversation(
+		conversation, map[string][]ext.Handler{
+			"registration": {registrationHandler},
+		},
+		&handlers.ConversationOpts{
+			AllowReEntry: true,
+		},
+	)
+
+	dispatcher.AddHandler(conversationHandler)
+	dispatcher.AddHandler(memberStartHandler)
+	dispatcher.AddHandler(nonMemberStartHandler)
+	dispatcher.AddHandler(nonMemberCheckingHandler)
 
 	// Start receiving updates.
 	err = updater.StartPolling(b, &ext.PollingOpts{
