@@ -48,6 +48,12 @@ func main() {
 		}).CheckMessage(b),
 		myhandlers.Registration,
 	)
+	rulesHandler := handlers.NewMessage(
+		(&bot.CheckMembershipOpts{
+			MessageText: languages.Response.Messages.Registration.Btns[0],
+		}).CheckMessage(b),
+		myhandlers.RulesAcceptance,
+	)
 	nonMemberStartHandler := handlers.NewMessage(
 		(&bot.CheckMembershipOpts{
 			ReverseState: true,
@@ -64,6 +70,7 @@ func main() {
 	conversationHandler := handlers.NewConversation(
 		conversation, map[string][]ext.Handler{
 			"registration": {registrationHandler},
+			"rules":        {rulesHandler},
 		},
 		&handlers.ConversationOpts{
 			AllowReEntry: true,
