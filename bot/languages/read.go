@@ -25,6 +25,10 @@ type Languages struct {
 			Response []string `json:"response"`
 			Btns     []string `json:"btns"`
 		}
+		Rules struct {
+			Query    string   `json:"query"`
+			Response []string `json:"response"`
+		}
 	}
 }
 
