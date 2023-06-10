@@ -6,33 +6,39 @@ import (
 	"os"
 )
 
-type Languages struct {
+type Messages struct {
 	Messages struct {
 		NonMember struct {
-			Query    string   `json:"query"`
 			Response []string `json:"response"`
 			Btns     []string `json:"btns"`
 			Failed   string   `json:"failed"`
 		}
 		Member struct {
-			Query    string   `json:"query"`
 			Response []string `json:"response"`
 			Btns     []string `json:"btns"`
 			Failed   string   `json:"failed"`
 		}
+	}
+	Conversations struct {
+		Exit struct {
+			Query string `json:"query"`
+		}
 		Registration struct {
-			Query    string   `json:"query"`
 			Response []string `json:"response"`
 			Btns     []string `json:"btns"`
 		}
 		Rules struct {
-			Query    string   `json:"query"`
 			Response []string `json:"response"`
+			Failed   string   `json:"failed"`
+		}
+		Username struct {
+			Response []string `json:"response"`
+			Failed   string   `json:"failed"`
 		}
 	}
 }
 
-var Response Languages
+var Response Messages
 
 func init() {
 	data, err := os.ReadFile("bot/languages/fa.json")
