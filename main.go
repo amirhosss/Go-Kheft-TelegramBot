@@ -42,6 +42,12 @@ func main() {
 	})
 	dispatcher := updater.Dispatcher
 
+	exitHandler := handlers.NewMessage(
+		(&bot.CheckMembershipOpts{
+			MessageText: languages.Response.Conversations.Exit.Query,
+		}).CheckMessage(b),
+		myhandlers.Exit,
+	)
 	registrationHandler := handlers.NewMessage(
 		(&bot.CheckMembershipOpts{
 			MessageText: languages.Response.Messages.Member.Btns[0],
@@ -49,10 +55,12 @@ func main() {
 		myhandlers.Registration,
 	)
 	rulesHandler := handlers.NewMessage(
-		(&bot.CheckMembershipOpts{
-			MessageText: languages.Response.Messages.Registration.Btns[0],
-		}).CheckMessage(b),
+		(&bot.CheckMembershipOpts{}).CheckMessage(b),
 		myhandlers.RulesAcceptance,
+	)
+	usernameHandler := handlers.NewMessage(
+		(&bot.CheckMembershipOpts{}).CheckMessage(b),
+		myhandlers.GetUsername,
 	)
 	nonMemberStartHandler := handlers.NewMessage(
 		(&bot.CheckMembershipOpts{
@@ -71,9 +79,11 @@ func main() {
 		conversation, map[string][]ext.Handler{
 			"registration": {registrationHandler},
 			"rules":        {rulesHandler},
+			"username":     {usernameHandler},
 		},
 		&handlers.ConversationOpts{
 			AllowReEntry: true,
+			Exits:        []ext.Handler{exitHandler},
 		},
 	)
 

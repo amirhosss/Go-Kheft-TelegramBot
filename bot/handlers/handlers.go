@@ -9,13 +9,11 @@ import (
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
-	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
 )
 
-// echo replies to a messages with its own contents.
 func NonMemberStart(b *gotgbot.Bot, ctx *ext.Context) error {
 	response := fmt.Sprintf(strings.Join(languages.Response.Messages.NonMember.Response, "\n"),
-		ctx.Message.Chat.FirstName, ctx.Message.Chat.Id, bot.Configs.ChannelUsername)
+		ctx.Message.Chat.FirstName, bot.Configs.ChannelUsername)
 
 	var keyboards [][]gotgbot.KeyboardButton
 	btns := languages.Response.Messages.NonMember.Btns
@@ -81,49 +79,4 @@ func NonMemberChecking(b *gotgbot.Bot, ctx *ext.Context) error {
 		}
 	}
 	return nil
-}
-
-func Registration(b *gotgbot.Bot, ctx *ext.Context) error {
-	var keyboards [][]gotgbot.KeyboardButton
-	btns := languages.Response.Messages.Registration.Btns
-	keyboard := make([]gotgbot.KeyboardButton, len(btns))
-
-	for i, data := range btns {
-		keyboard[i].Text = data
-	}
-	keyboards = append(keyboards, keyboard[:])
-	markup := gotgbot.ReplyKeyboardMarkup{
-		Keyboard:        keyboards,
-		ResizeKeyboard:  true,
-		OneTimeKeyboard: true,
-	}
-
-	response := fmt.Sprintf(
-		strings.Join(languages.Response.Messages.Registration.Response, "\n"),
-		bot.Configs.RegistrationPrice,
-	)
-	_, err := ctx.EffectiveMessage.Reply(b,
-		response,
-		&gotgbot.SendMessageOpts{
-			ReplyMarkup: markup,
-			ParseMode:   "MarkdownV2",
-		},
-	)
-	if err != nil {
-		return fmt.Errorf("registration failed: %s", err)
-	}
-	return handlers.NextConversationState("rules")
-}
-
-func RulesAcceptance(b *gotgbot.Bot, ctx *ext.Context) error {
-	_, err := ctx.EffectiveMessage.Reply(b,
-		strings.Join(languages.Response.Messages.Rules.Response, "\n"),
-		&gotgbot.SendMessageOpts{
-			ParseMode: "MarkdownV2",
-		},
-	)
-	if err != nil {
-		return fmt.Errorf("registration failed: %s", err)
-	}
-	return handlers.NextConversationState("end")
 }
