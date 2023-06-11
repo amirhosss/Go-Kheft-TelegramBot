@@ -50,17 +50,21 @@ func main() {
 	)
 	registrationHandler := handlers.NewMessage(
 		(&bot.CheckMembershipOpts{
-			MessageText: languages.Response.Messages.Member.Btns[0],
+			MessageText: languages.Response.Conversations.Registration.Query,
 		}).CheckMessage(b),
 		myhandlers.Registration,
 	)
-	rulesHandler := handlers.NewMessage(
+	rulesAcceptanceHandler := handlers.NewMessage(
 		(&bot.CheckMembershipOpts{}).CheckMessage(b),
 		myhandlers.RulesAcceptance,
 	)
-	usernameHandler := handlers.NewMessage(
+	getUsernameHandler := handlers.NewMessage(
 		(&bot.CheckMembershipOpts{}).CheckMessage(b),
 		myhandlers.GetUsername,
+	)
+	getPriceHandler := handlers.NewMessage(
+		(&bot.CheckMembershipOpts{}).CheckMessage(b),
+		myhandlers.GetPrice,
 	)
 	nonMemberStartHandler := handlers.NewMessage(
 		(&bot.CheckMembershipOpts{
@@ -78,8 +82,9 @@ func main() {
 	conversationHandler := handlers.NewConversation(
 		conversation, map[string][]ext.Handler{
 			"registration": {registrationHandler},
-			"rules":        {rulesHandler},
-			"username":     {usernameHandler},
+			"rules":        {rulesAcceptanceHandler},
+			"username":     {getUsernameHandler},
+			"price":        {getPriceHandler},
 		},
 		&handlers.ConversationOpts{
 			AllowReEntry: true,
