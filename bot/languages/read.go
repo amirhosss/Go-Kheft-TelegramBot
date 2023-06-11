@@ -24,14 +24,21 @@ type Messages struct {
 			Query string `json:"query"`
 		}
 		Registration struct {
+			Query    string   `json:"query"`
 			Response []string `json:"response"`
 			Btns     []string `json:"btns"`
 		}
 		Rules struct {
+			Query    string   `json:"query"`
 			Response []string `json:"response"`
 			Failed   string   `json:"failed"`
 		}
 		Username struct {
+			Query    string   `json:"query"`
+			Response []string `json:"response"`
+		}
+		Price struct {
+			Query    string   `json:"query"`
 			Response []string `json:"response"`
 			Failed   string   `json:"failed"`
 		}
