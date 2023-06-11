@@ -41,8 +41,9 @@ type Messages struct {
 			Failed   string   `json:"failed"`
 		}
 		Advertise struct {
-			Response []string `json:"response"`
-			Failed   string   `json:"failed"`
+			Response    []string `json:"response"`
+			Failed      string   `json:"failed"`
+			FailedLimit string   `json:"failedLimit"`
 		}
 	}
 }

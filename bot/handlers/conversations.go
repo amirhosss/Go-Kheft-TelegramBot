@@ -11,6 +11,8 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 )
 
 func Exit(b *gotgbot.Bot, ctx *ext.Context) error {
@@ -37,8 +39,9 @@ func Registration(b *gotgbot.Bot, ctx *ext.Context) error {
 		OneTimeKeyboard: true,
 	}
 
-	response := fmt.Sprintf(
-		strings.Join(responseField.Response, "\n"),
+	printer := message.NewPrinter(language.Persian)
+	response := printer.Sprintf(
+		strings.Join(responseField.Response, strings.Repeat("\n", 2)),
 		bot.Configs.RegistrationPrice,
 	)
 	_, err := ctx.EffectiveMessage.Reply(b,
@@ -136,8 +139,7 @@ func RegisterAdvertise(b *gotgbot.Bot, ctx *ext.Context) error {
 			return fmt.Errorf("register advertise failed: %s", err)
 		}
 		return handlers.NextConversationState("advertise")
-	} else {
-		fmt.Println(price)
+	} else if bot.Configs.PriceLimit[0] <= price && price <= bot.Configs.PriceLimit[1] {
 		_, err := ctx.EffectiveMessage.Reply(b,
 			strings.Join(responseField.Response, "\n"),
 			&gotgbot.SendMessageOpts{
@@ -147,6 +149,22 @@ func RegisterAdvertise(b *gotgbot.Bot, ctx *ext.Context) error {
 		if err != nil {
 			return fmt.Errorf("register advertise failed: %s", err)
 		}
+		return handlers.EndConversation()
 	}
-	return handlers.EndConversation()
+	printer := message.NewPrinter(language.Persian)
+	response := printer.Sprintf(
+		responseField.FailedLimit,
+		bot.Configs.PriceLimit[0],
+		bot.Configs.PriceLimit[1],
+	)
+	_, err = ctx.EffectiveMessage.Reply(b,
+		response,
+		&gotgbot.SendMessageOpts{
+			ParseMode: "MARKDOWNV2",
+		},
+	)
+	if err != nil {
+		return fmt.Errorf("register advertise failed: %s", err)
+	}
+	return handlers.NextConversationState("advertise")
 }
