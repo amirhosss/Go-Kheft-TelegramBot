@@ -66,6 +66,10 @@ func main() {
 		(&bot.CheckMembershipOpts{}).CheckMessage(b),
 		myhandlers.GetPrice,
 	)
+	registerAdvertiseHandler := handlers.NewMessage(
+		(&bot.CheckMembershipOpts{}).CheckMessage(b),
+		myhandlers.RegisterAdvertise,
+	)
 	nonMemberStartHandler := handlers.NewMessage(
 		(&bot.CheckMembershipOpts{
 			ReverseState: true,
@@ -85,6 +89,7 @@ func main() {
 			"rules":        {rulesAcceptanceHandler},
 			"username":     {getUsernameHandler},
 			"price":        {getPriceHandler},
+			"advertise":    {registerAdvertiseHandler},
 		},
 		&handlers.ConversationOpts{
 			AllowReEntry: true,

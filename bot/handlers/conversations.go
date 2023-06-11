@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"kheft/bot"
@@ -105,7 +106,7 @@ func GetPrice(b *gotgbot.Bot, ctx *ext.Context) error {
 		if err != nil {
 			return fmt.Errorf("get price failed: %s", err)
 		}
-		return handlers.EndConversation()
+		return handlers.NextConversationState("advertise")
 	} else {
 		_, err := ctx.EffectiveMessage.Reply(b,
 			responseField.Failed,
@@ -118,4 +119,34 @@ func GetPrice(b *gotgbot.Bot, ctx *ext.Context) error {
 		}
 	}
 	return handlers.NextConversationState("price")
+}
+
+func RegisterAdvertise(b *gotgbot.Bot, ctx *ext.Context) error {
+	responseField := languages.Response.Conversations.Advertise
+
+	price, err := strconv.ParseInt(ctx.EffectiveMessage.Text, 10, 64)
+	if err != nil {
+		_, err := ctx.EffectiveMessage.Reply(b,
+			responseField.Failed,
+			&gotgbot.SendMessageOpts{
+				ParseMode: "MARKDOWNV2",
+			},
+		)
+		if err != nil {
+			return fmt.Errorf("register advertise failed: %s", err)
+		}
+		return handlers.NextConversationState("advertise")
+	} else {
+		fmt.Println(price)
+		_, err := ctx.EffectiveMessage.Reply(b,
+			strings.Join(responseField.Response, "\n"),
+			&gotgbot.SendMessageOpts{
+				ParseMode: "MARKDOWNV2",
+			},
+		)
+		if err != nil {
+			return fmt.Errorf("register advertise failed: %s", err)
+		}
+	}
+	return handlers.EndConversation()
 }
