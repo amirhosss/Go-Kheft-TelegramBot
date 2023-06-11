@@ -34,11 +34,13 @@ type Messages struct {
 			Failed   string   `json:"failed"`
 		}
 		Username struct {
-			Query    string   `json:"query"`
 			Response []string `json:"response"`
 		}
 		Price struct {
-			Query    string   `json:"query"`
+			Response []string `json:"response"`
+			Failed   string   `json:"failed"`
+		}
+		Advertise struct {
 			Response []string `json:"response"`
 			Failed   string   `json:"failed"`
 		}
