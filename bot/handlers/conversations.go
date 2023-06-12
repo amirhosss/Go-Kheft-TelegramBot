@@ -127,8 +127,32 @@ func GetPrice(b *gotgbot.Bot, ctx *ext.Context) error {
 func RegisterAdvertise(b *gotgbot.Bot, ctx *ext.Context) error {
 	responseField := languages.Response.Conversations.Advertise
 
-	price, err := strconv.ParseInt(ctx.EffectiveMessage.Text, 10, 64)
+	convertFromPersianDigits := func(s string) string {
+		persianDigitsMap := map[string]string{
+			"۰": "0",
+			"۱": "1",
+			"۲": "2",
+			"۳": "3",
+			"۴": "4",
+			"۵": "5",
+			"۶": "6",
+			"۷": "7",
+			"۸": "8",
+			"۹": "9",
+		}
+		convertedStr := strings.Map(func(r rune) rune {
+			if replacement, ok := persianDigitsMap[string(r)]; ok {
+				return []rune(replacement)[0]
+			}
+			return r
+		}, s)
+		return convertedStr
+	}
+
+	convertedAscii := convertFromPersianDigits(ctx.EffectiveMessage.Text)
+	price, err := strconv.ParseInt(convertedAscii, 10, 64)
 	if err != nil {
+		fmt.Println(err, ctx.EffectiveMessage.Text)
 		_, err := ctx.EffectiveMessage.Reply(b,
 			responseField.Failed,
 			&gotgbot.SendMessageOpts{
