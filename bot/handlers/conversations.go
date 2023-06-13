@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"kheft/bot"
 	"kheft/bot/languages"
@@ -14,6 +15,12 @@ import (
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )
+
+var users map[int64]*User
+
+func init() {
+	users = make(map[int64]*User)
+}
 
 func Exit(b *gotgbot.Bot, ctx *ext.Context) error {
 	err := MemberStart(b, ctx)
@@ -85,6 +92,9 @@ func RulesAcceptance(b *gotgbot.Bot, ctx *ext.Context) error {
 
 func GetUsername(b *gotgbot.Bot, ctx *ext.Context) error {
 	responseField := languages.Response.Conversations.Username
+	users[ctx.EffectiveMessage.Chat.Id] = &User{
+		AdvertiseDescription: ctx.EffectiveMessage.Text,
+	}
 	_, err := ctx.EffectiveMessage.Reply(b,
 		strings.Join(responseField.Response, "\n"),
 		&gotgbot.SendMessageOpts{
@@ -100,6 +110,10 @@ func GetUsername(b *gotgbot.Bot, ctx *ext.Context) error {
 func GetPrice(b *gotgbot.Bot, ctx *ext.Context) error {
 	responseField := languages.Response.Conversations.Price
 	if strings.HasPrefix(ctx.EffectiveMessage.Text, "@") {
+		if user, ok := users[ctx.EffectiveMessage.Chat.Id]; ok {
+			user.Username = ctx.EffectiveMessage.Text
+		}
+
 		_, err := ctx.EffectiveMessage.Reply(b,
 			strings.Join(responseField.Response, "\n"),
 			&gotgbot.SendMessageOpts{
@@ -152,7 +166,6 @@ func RegisterAdvertise(b *gotgbot.Bot, ctx *ext.Context) error {
 	convertedAscii := convertFromPersianDigits(ctx.EffectiveMessage.Text)
 	price, err := strconv.ParseInt(convertedAscii, 10, 64)
 	if err != nil {
-		fmt.Println(err, ctx.EffectiveMessage.Text)
 		_, err := ctx.EffectiveMessage.Reply(b,
 			responseField.Failed,
 			&gotgbot.SendMessageOpts{
@@ -164,7 +177,11 @@ func RegisterAdvertise(b *gotgbot.Bot, ctx *ext.Context) error {
 		}
 		return handlers.NextConversationState("advertise")
 	} else if bot.Configs.PriceLimit[0] <= price && price <= bot.Configs.PriceLimit[1] {
-		_, err := ctx.EffectiveMessage.Reply(b,
+		if user, ok := users[ctx.EffectiveMessage.Chat.Id]; ok {
+			user.AdvertisePrice = price
+		}
+
+		msg, err := ctx.EffectiveMessage.Reply(b,
 			strings.Join(responseField.Response, "\n"),
 			&gotgbot.SendMessageOpts{
 				ParseMode: "MARKDOWNV2",
@@ -173,6 +190,15 @@ func RegisterAdvertise(b *gotgbot.Bot, ctx *ext.Context) error {
 		if err != nil {
 			return fmt.Errorf("register advertise failed: %s", err)
 		}
+
+		time.Sleep(2 * time.Second)
+		sendDescription(b, ctx)
+
+		_, err = b.DeleteMessage(msg.Chat.Id, msg.MessageId, nil)
+		if err != nil {
+			return fmt.Errorf("delete message in register advertise failed: %s", err)
+		}
+
 		return handlers.EndConversation()
 	}
 	printer := message.NewPrinter(language.Persian)
@@ -191,4 +217,25 @@ func RegisterAdvertise(b *gotgbot.Bot, ctx *ext.Context) error {
 		return fmt.Errorf("register advertise failed: %s", err)
 	}
 	return handlers.NextConversationState("advertise")
+}
+
+func sendDescription(b *gotgbot.Bot, ctx *ext.Context) error {
+	responseField := languages.Response.Conversations.Description
+	printer := message.NewPrinter(language.Persian)
+	response := printer.Sprintf(strings.Join(responseField.Response, "\n"),
+		ctx.EffectiveMessage.Chat.FirstName,
+		users[ctx.EffectiveMessage.Chat.Id].AdvertiseDescription,
+		users[ctx.EffectiveMessage.Chat.Id].Username,
+		users[ctx.EffectiveMessage.Chat.Id].AdvertisePrice,
+	)
+	_, err := ctx.EffectiveMessage.Reply(b,
+		response,
+		&gotgbot.SendMessageOpts{
+			ParseMode: "MARKDOWNV2",
+		},
+	)
+	if err != nil {
+		return fmt.Errorf("send description failed: %s", err)
+	}
+	return nil
 }
