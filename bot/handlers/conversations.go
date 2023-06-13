@@ -55,7 +55,6 @@ func Registration(b *gotgbot.Bot, ctx *ext.Context) error {
 		response,
 		&gotgbot.SendMessageOpts{
 			ReplyMarkup: markup,
-			ParseMode:   "MarkdownV2",
 		},
 	)
 	if err != nil {
@@ -70,7 +69,7 @@ func RulesAcceptance(b *gotgbot.Bot, ctx *ext.Context) error {
 		_, err := ctx.EffectiveMessage.Reply(b,
 			strings.Join(responseField.Response, "\n"),
 			&gotgbot.SendMessageOpts{
-				ParseMode: "MarkdownV2",
+				ParseMode: "",
 			},
 		)
 		if err != nil {
@@ -78,10 +77,7 @@ func RulesAcceptance(b *gotgbot.Bot, ctx *ext.Context) error {
 		}
 		return handlers.NextConversationState("username")
 	} else {
-		_, err := ctx.EffectiveMessage.Reply(b, responseField.Failed,
-			&gotgbot.SendMessageOpts{
-				ParseMode: "MARKDOWNV2",
-			})
+		_, err := ctx.EffectiveMessage.Reply(b, responseField.Failed, nil)
 		if err != nil {
 			return fmt.Errorf("rules acceptance failed: %s", err)
 
@@ -96,11 +92,7 @@ func GetUsername(b *gotgbot.Bot, ctx *ext.Context) error {
 		AdvertiseDescription: ctx.EffectiveMessage.Text,
 	}
 	_, err := ctx.EffectiveMessage.Reply(b,
-		strings.Join(responseField.Response, "\n"),
-		&gotgbot.SendMessageOpts{
-			ParseMode: "MARKDOWNV2",
-		},
-	)
+		strings.Join(responseField.Response, "\n"), nil)
 	if err != nil {
 		return fmt.Errorf("get username failed: %s", err)
 	}
@@ -115,10 +107,7 @@ func GetPrice(b *gotgbot.Bot, ctx *ext.Context) error {
 		}
 
 		_, err := ctx.EffectiveMessage.Reply(b,
-			strings.Join(responseField.Response, "\n"),
-			&gotgbot.SendMessageOpts{
-				ParseMode: "MarkdownV2",
-			},
+			strings.Join(responseField.Response, "\n"), nil,
 		)
 		if err != nil {
 			return fmt.Errorf("get price failed: %s", err)
@@ -126,11 +115,7 @@ func GetPrice(b *gotgbot.Bot, ctx *ext.Context) error {
 		return handlers.NextConversationState("advertise")
 	} else {
 		_, err := ctx.EffectiveMessage.Reply(b,
-			responseField.Failed,
-			&gotgbot.SendMessageOpts{
-				ParseMode: "MARKDOWNV2",
-			},
-		)
+			responseField.Failed, nil)
 		if err != nil {
 			return fmt.Errorf("get username failed: %s", err)
 		}
@@ -167,11 +152,7 @@ func RegisterAdvertise(b *gotgbot.Bot, ctx *ext.Context) error {
 	price, err := strconv.ParseInt(convertedAscii, 10, 64)
 	if err != nil {
 		_, err := ctx.EffectiveMessage.Reply(b,
-			responseField.Failed,
-			&gotgbot.SendMessageOpts{
-				ParseMode: "MARKDOWNV2",
-			},
-		)
+			responseField.Failed, nil)
 		if err != nil {
 			return fmt.Errorf("register advertise failed: %s", err)
 		}
@@ -182,17 +163,16 @@ func RegisterAdvertise(b *gotgbot.Bot, ctx *ext.Context) error {
 		}
 
 		msg, err := ctx.EffectiveMessage.Reply(b,
-			strings.Join(responseField.Response, "\n"),
-			&gotgbot.SendMessageOpts{
-				ParseMode: "MARKDOWNV2",
-			},
-		)
+			strings.Join(responseField.Response, "\n"), nil)
 		if err != nil {
 			return fmt.Errorf("register advertise failed: %s", err)
 		}
 
 		time.Sleep(2 * time.Second)
-		sendDescription(b, ctx)
+		err = sendDescription(b, ctx)
+		if err != nil {
+			return fmt.Errorf("send description failed: %s", err)
+		}
 
 		_, err = b.DeleteMessage(msg.Chat.Id, msg.MessageId, nil)
 		if err != nil {
@@ -208,11 +188,7 @@ func RegisterAdvertise(b *gotgbot.Bot, ctx *ext.Context) error {
 		bot.Configs.PriceLimit[1],
 	)
 	_, err = ctx.EffectiveMessage.Reply(b,
-		response,
-		&gotgbot.SendMessageOpts{
-			ParseMode: "MARKDOWNV2",
-		},
-	)
+		response, nil)
 	if err != nil {
 		return fmt.Errorf("register advertise failed: %s", err)
 	}
@@ -230,9 +206,7 @@ func sendDescription(b *gotgbot.Bot, ctx *ext.Context) error {
 	)
 	_, err := ctx.EffectiveMessage.Reply(b,
 		response,
-		&gotgbot.SendMessageOpts{
-			ParseMode: "MARKDOWNV2",
-		},
+		&gotgbot.SendMessageOpts{},
 	)
 	if err != nil {
 		return fmt.Errorf("send description failed: %s", err)

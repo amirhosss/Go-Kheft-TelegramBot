@@ -29,10 +29,11 @@ func NonMemberStart(b *gotgbot.Bot, ctx *ext.Context) error {
 		OneTimeKeyboard: true,
 	}
 
-	_, err := ctx.EffectiveMessage.Reply(b, response, &gotgbot.SendMessageOpts{
-		ParseMode:   "MarkdownV2",
-		ReplyMarkup: markup,
-	})
+	_, err := ctx.EffectiveMessage.Reply(b, response,
+		&gotgbot.SendMessageOpts{
+			ReplyMarkup: markup,
+		},
+	)
 	if err != nil {
 		return fmt.Errorf("failed to send reply: %w", err)
 	}
@@ -57,8 +58,8 @@ func MemberStart(b *gotgbot.Bot, ctx *ext.Context) error {
 		strings.Join(languages.Response.Messages.Member.Response, "\n"),
 		&gotgbot.SendMessageOpts{
 			ReplyMarkup: markup,
-			ParseMode:   "MarkdownV2",
-		})
+		},
+	)
 	if err != nil {
 		return fmt.Errorf("failed to reply nonmemberchecking: %s", err)
 	}
