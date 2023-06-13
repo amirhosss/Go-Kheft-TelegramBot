@@ -45,6 +45,9 @@ type Messages struct {
 			Failed      string   `json:"failed"`
 			FailedLimit string   `json:"failedLimit"`
 		}
+		Description struct {
+			Response []string `json:"response"`
+		}
 	}
 }
 
