@@ -1,13 +1,17 @@
 package bot
 
 type configs struct {
-	BotToken        string
-	ChannelChatId   int64
-	ChannelUsername string
+	BotToken          string
+	ChannelChatId     int64
+	ChannelUsername   string
+	RegistrationPrice int64
+	PriceLimit        [2]int64
 }
 
 var Configs *configs = &configs{
-	BotToken:        "",
-	ChannelChatId:   ,
-	ChannelUsername: "",
+	BotToken:          "",
+	ChannelChatId:     ,
+	ChannelUsername:   "",
+	RegistrationPrice: ,
+	PriceLimit:        [2]int64{},
 }
