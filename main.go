@@ -15,9 +15,7 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters/message"
 )
 
-// This bot is as basic as it gets - it simply repeats everything you say.
 func main() {
-	// Create bot from environment value.
 	b, err := gotgbot.NewBot(bot.Configs.BotToken, &gotgbot.BotOpts{
 		Client: http.Client{},
 		DefaultRequestOpts: &gotgbot.RequestOpts{
@@ -102,7 +100,6 @@ func main() {
 	dispatcher.AddHandler(nonMemberStartHandler)
 	dispatcher.AddHandler(nonMemberCheckingHandler)
 
-	// Start receiving updates.
 	err = updater.StartPolling(b, &ext.PollingOpts{
 		DropPendingUpdates: true,
 		GetUpdatesOpts: gotgbot.GetUpdatesOpts{
