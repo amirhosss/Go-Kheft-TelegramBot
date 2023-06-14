@@ -16,12 +16,6 @@ import (
 	"golang.org/x/text/message"
 )
 
-var users map[int64]*User
-
-func init() {
-	users = make(map[int64]*User)
-}
-
 func Exit(b *gotgbot.Bot, ctx *ext.Context) error {
 	err := MemberStart(b, ctx)
 	if err != nil {
@@ -67,11 +61,7 @@ func RulesAcceptance(b *gotgbot.Bot, ctx *ext.Context) error {
 	responseField := languages.Response.Conversations.Rules
 	if ctx.EffectiveMessage.Text == responseField.Query {
 		_, err := ctx.EffectiveMessage.Reply(b,
-			strings.Join(responseField.Response, "\n"),
-			&gotgbot.SendMessageOpts{
-				ParseMode: "",
-			},
-		)
+			strings.Join(responseField.Response, "\n"), nil)
 		if err != nil {
 			return fmt.Errorf("rules acceptance failed: %s", err)
 		}
@@ -88,8 +78,9 @@ func RulesAcceptance(b *gotgbot.Bot, ctx *ext.Context) error {
 
 func GetUsername(b *gotgbot.Bot, ctx *ext.Context) error {
 	responseField := languages.Response.Conversations.Username
-	users[ctx.EffectiveMessage.Chat.Id] = &User{
-		AdvertiseDescription: ctx.EffectiveMessage.Text,
+	users[ctx.EffectiveMessage.Chat.Id] = &user{
+		chatId:               ctx.Message.Chat.Id,
+		advertiseDescription: ctx.EffectiveMessage.Text,
 	}
 	_, err := ctx.EffectiveMessage.Reply(b,
 		strings.Join(responseField.Response, "\n"), nil)
@@ -102,8 +93,10 @@ func GetUsername(b *gotgbot.Bot, ctx *ext.Context) error {
 func GetPrice(b *gotgbot.Bot, ctx *ext.Context) error {
 	responseField := languages.Response.Conversations.Price
 	if strings.HasPrefix(ctx.EffectiveMessage.Text, "@") {
+		username := ctx.EffectiveMessage.Text
+
 		if user, ok := users[ctx.EffectiveMessage.Chat.Id]; ok {
-			user.Username = ctx.EffectiveMessage.Text
+			user.username = username
 		}
 
 		_, err := ctx.EffectiveMessage.Reply(b,
@@ -159,7 +152,7 @@ func RegisterAdvertise(b *gotgbot.Bot, ctx *ext.Context) error {
 		return handlers.NextConversationState("advertise")
 	} else if bot.Configs.PriceLimit[0] <= price && price <= bot.Configs.PriceLimit[1] {
 		if user, ok := users[ctx.EffectiveMessage.Chat.Id]; ok {
-			user.AdvertisePrice = price
+			user.advertisePrice = price
 		}
 
 		msg, err := ctx.EffectiveMessage.Reply(b,
@@ -200,9 +193,9 @@ func sendDescription(b *gotgbot.Bot, ctx *ext.Context) error {
 	printer := message.NewPrinter(language.Persian)
 	response := printer.Sprintf(strings.Join(responseField.Response, "\n"),
 		ctx.EffectiveMessage.Chat.FirstName,
-		users[ctx.EffectiveMessage.Chat.Id].AdvertiseDescription,
-		users[ctx.EffectiveMessage.Chat.Id].Username,
-		users[ctx.EffectiveMessage.Chat.Id].AdvertisePrice,
+		users[ctx.EffectiveMessage.Chat.Id].advertiseDescription,
+		users[ctx.EffectiveMessage.Chat.Id].username,
+		users[ctx.EffectiveMessage.Chat.Id].advertisePrice,
 	)
 	_, err := ctx.EffectiveMessage.Reply(b,
 		response,

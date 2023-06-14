@@ -1,8 +1,10 @@
 package handlers
 
-type User struct {
-	ChatId               int64
-	Username             string
-	AdvertisePrice       int64
-	AdvertiseDescription string
+type user struct {
+	chatId               int64
+	username             string
+	advertisePrice       int64
+	advertiseDescription string
 }
+
+var users map[int64]*user = make(map[int64]*user)
